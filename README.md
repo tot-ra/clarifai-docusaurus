@@ -14,11 +14,12 @@ This allows to search your documentation using AI. Specifically, it uses embeddi
 
 ## TODOs
 - add LRU cache to not hit Clarifai API on every search
+- convert to typescript
 - index images & PDFs to have visual search built-in
-- have fallback to local text search
 - have RAG, so that search could answer questions
 - have CI example to have reindexing working automatically
 - remove index from clarifai on .md file deletion
+- have fallback to local text search (for example if search failed or is too slow)
 
 ## Installation
 1. After having docusaurus installed, add `src/theme/SearchBar.js` to render results. This component should make requests to your locally running search service `proxy-search.js` (replace `localhost:5000` with real production url you will host)
