@@ -89,9 +89,9 @@ export default function SearchBarWrapper(props) {
 (Optional) To position input in the sidebar, edit docusaurus config and set under themeConfig.navbar.items:
 ```json
 {
-  type: 'search',
-  'position': 'right',
-},
+  "type": "search",
+  "position": "right"
+}
 ```
 
 
