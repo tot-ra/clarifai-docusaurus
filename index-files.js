@@ -1,57 +1,69 @@
+require('dotenv').config();
+
 const fs = require('fs');
-const path = require('path');
+const { title } = require('process');
 const recursive = require('recursive-readdir');
-const { ClarifaiStub, grpc } = require("clarifai-nodejs-grpc");
 
-// Replace with your Clarifai API key
-const CLARIFAI_API_KEY = 'c239bf7ec6bf4a8aa8c0f4ef82586fe4';
-
-// Initialize Clarifai client
-const stub = ClarifaiStub.grpc();
-const metadata = new grpc.Metadata();
-metadata.set("authorization", `Key ${CLARIFAI_API_KEY}`);
 
 // Function to send data to Clarifai
-const sendToClarifai = async (id, filepath, paragraph) => {
-
-    // console.log({
-    //     id,
-    //     filepath,
-    //     paragraph
-    // })
-
-    return new Promise((resolve, reject) => {
-        stub.PostInputs(
+const sendToClarifai = async (id, filepath, text) => {
+    const raw = JSON.stringify({
+        "user_app_id": {
+            "user_id": process.env.CLARIFAI_USER_ID,
+            "app_id": process.env.CLARIFAI_APP_ID
+        },
+        "inputs": [
             {
-                inputs: [
-                    {
-                        data: {
-                            text: {
-                                raw: paragraph
-                            },
+                id,
+                "data": {
+                    text: {
+                        raw: text
+                    },
 
-                            metadata: {
-                                filepath
-                            }
-                        },
-                        // id: id
+                    metadata: {
+                        filepath,
+                        url: filepath.replace(".md", ""),
+                        title: getTitleFromMarkdown(text)
                     }
-                ]
-            },
-            metadata,
-            (err, response) => {
-                if (err) {
-                    reject(err);
-                } else if (response.status.code !== 10000) {
-                    console.log(response)
-                    reject(`Clarifai API Error: ${response.status.description}`);
-                } else {
-                    resolve(response);
                 }
             }
-        );
+        ]
     });
+
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Key ' + process.env.CLARIFAI_PAT
+        },
+        body: raw
+    };
+
+    fetch("https://api.clarifai.com/v2/inputs", requestOptions)
+        .then(response => response.text())
+        .then(result => console.log(result))
+        .catch(error => console.log('error', error));
+
+    // sleep 100ms to not overwhelm the API
+    await new Promise(r => setTimeout(r, 100));
+
 };
+
+function getTitleFromMarkdown(text) {
+    // First try to get title from frontmatter
+    const titleRegex = /^title:\s+(.*)/gm;
+    const match = titleRegex.exec(text);
+    let title = match ? match[1] : null;
+
+    // If no title in frontmatter, try to get title from first heading
+    if (!title) {
+        const titleRegex = /^#\s+(.*)/gm;
+        const match = titleRegex.exec(text);
+        title = match ? match[1] : null;    
+    }
+
+    return title;
+}
 
 // Function to read and process .md files
 const processMarkdownFiles = async (dirPath) => {
@@ -59,30 +71,16 @@ const processMarkdownFiles = async (dirPath) => {
         const files = await recursive(dirPath, ['!*.md']);
         
         for (const file of files) {
-            const content = fs.readFileSync(file, 'utf-8');
-            const paragraphs = content.split(/\n\s*\n/);
+            const text = fs.readFileSync(file, 'utf-8');
+            filepath = file.replace(dirPath, '');
 
-
-            for (let i = 0; i < paragraphs.length; i++) {
-                const paragraph = paragraphs[i].trim();
-                if (paragraph) {
-                    filepath = file.replace(dirPath, '');
-                    const id = `${filepath}-p-${i + 1}`;
-
-                    try {
-                        const response = await sendToClarifai(id, file, paragraph);
-                        console.log(response)
-                        console.log(`Uploaded Paragraph ${i + 1} from ${file}`);
-                    } catch (err) {
-                        console.error(`Failed to upload ${id}:`, err);
-                    }
-                }
-            }
-
+            // id is tied to file contents in case file is moved or changed and we re-run indexing
+            const id = require('crypto').createHash('md5')
+                .update(text)
+                .digest('hex');
 
             // send entire file too
-            await sendToClarifai(filepath, file, content);
-
+            await sendToClarifai(id, filepath, text);
         }
     } catch (err) {
         console.error("Error reading files:", err);

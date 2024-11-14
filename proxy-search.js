@@ -1,42 +1,62 @@
-// server.js
 require('dotenv').config();
 const fastify = require('fastify')({ logger: true });
-// const axios = require('axios');
 const PORT = 5000;
 
-let { User, Search } = require("clarifai-nodejs");
-const client = new User({
-  userId: process.env.CLARIFAI_USER_ID,
-  pat: process.env.CLARIFAI_PAT,
-  appId: process.env.CLARIFAI_APP_ID,
+// add CORS SUPPORT
+fastify.register(require('@fastify/cors'), {
+  origin: '*',
 });
+
 
 // Fastify route for POST /search
 fastify.post('/search', async (request, reply) => {
   try {
-    const search = new Search({
-      authConfig: {
-        userId: process.env.CLARIFAI_USER_ID,
-        pat: process.env.CLARIFAI_PAT,
-        appId: process.env.CLARIFAI_APP_ID,
+    const raw = JSON.stringify({
+      "user_app_id": {
+          "user_id": process.env.CLARIFAI_USER_ID,
+          "app_id": process.env.CLARIFAI_APP_ID
       },
-      topK: 1,
-      metric: "euclidean",
-    });
+      "pagination": {
+          "per_page": 10
+      },
+      "searches": [
+          {
+              "query": {
+                  "ranks": [
+                      {
+                          "annotation": {
+                              "data": {
+                                  "text": {
+                                      "raw": request.body.text
+                                  }
+                              }
+                          }
+                      }
+                  ]
+              }
+          }
+      ]
+  });
+
+  const requestOptions = {
+      method: 'POST',
+      headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Key ' + process.env.CLARIFAI_PAT
+      },
+      body: raw
+  };
+
+  out = await fetch(`https://api.clarifai.com/v2/inputs/searches?per_page=10`, requestOptions)
+
+
+  //convert readable stream to string
+  out = await out.json();
+
+  console.dir(out, {depth: null});
+
+  reply.send(out);
     
-    // Perform a search query with a specified text rank
-    const response = await search.query({
-      ranks: [{ textRaw: request.body.text}],
-    });
-
-    for await (const r of response) {
-      hit = r?.hitsList?.[0]?.input?.data?.image?.url;
-      
-      console.dir(r, {depth: null});
-    }
-
-    // Send back the response from Clarifai to the client
-    reply.send(response);
   } catch (error) {
     // Handle errors
     fastify.log.error(error);
