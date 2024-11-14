@@ -86,6 +86,14 @@ export default function SearchBarWrapper(props) {
 
 ```
 
+(Optional) To position input in the sidebar, edit docusaurus config and set under themeConfig.navbar.items:
+```json
+{
+  type: 'search',
+  'position': 'right',
+},
+```
+
 
 2. Checkout this repo somewhere close to your docs. 
 3. Register in Clarifai and create an app with text workflow.
