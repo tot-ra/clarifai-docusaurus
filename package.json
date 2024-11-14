@@ -1,0 +1,28 @@
+{
+  "name": "clarifai-docusaurus",
+  "version": "1.0.0",
+  "description": "attempt to write a search plugin",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tot-ra/clarifai-docusaurus.git"
+  },
+  "author": "Artjom Kurapov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tot-ra/clarifai-docusaurus/issues"
+  },
+  "homepage": "https://github.com/tot-ra/clarifai-docusaurus#readme",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "clarifai-nodejs": "^0.0.3",
+    "clarifai-nodejs-grpc": "^10.9.8",
+    "dotenv": "^16.4.5",
+    "fastify": "^5.1.0",
+    "fastify-cors": "^6.0.3",
+    "recursive-readdir": "^2.2.3"
+  }
+}
