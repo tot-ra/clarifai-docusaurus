@@ -6,8 +6,8 @@ This allows to search your documentation using AI. Specifically, it uses embeddi
 ![](docs/example.png)
 
 ## Why
-1. Compared to traditional text search, this allows to find documents that are relevant by **meaning**.
-2. You control indexing of your documents (compared to things like Algolia) and you can delete index as well.
+1. Compared to traditional text search, this allows to find documents that are relevant by **meaning**. You can pick which embedding model should be used (multilingual, domain specific etc) and the granularity level (document, paragraph etc)
+2. You control indexing time and speed of your documents (compared to crawling done by Algolia for example).
 3. You can customize search process yourself as search service runs on your side
 
 ## TODOs
