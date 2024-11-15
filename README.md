@@ -23,68 +23,9 @@ This allows to search your documentation using AI. Specifically, it uses embeddi
   - needs different UI, large modal for more text, chat history etc
 
 ## Installation
-1. After having docusaurus installed, add `src/theme/SearchBar.js` to render results. This component should make requests to your locally running search service `proxy-search.js` (replace `localhost:5000` with real production url you will host)
+1. After having docusaurus installed, copy `SearchBar.js` to your repo `src/theme/SearchBar.js` to render results. 
+This component should make requests to your locally running search service `proxy-search.js` (replace `localhost:5000` with real production url you will host)
 
-```js
-import React, { useState } from 'react';
-
-export default function SearchBarWrapper(props) {
-
-  let [searchResults, setResults] = useState([])
-
-  function search(e) {
-    if (e.target.value.length <3) return
-  
-    // make fetch request to localhost:5000
-    fetch('http://localhost:5000/search', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        text: e.target.value,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Success:', data);
-
-        setResults(data)
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
-  }
-  
-
-  return (
-    <>
-      <input type="text" 
-      placeholder="Search" 
-      onChange={search}
-      onBlur={search} 
-      onSubmit={search}
-      style={{padding:"7px 15px"}} />
-
-    {searchResults && searchResults.hits && searchResults.hits.length > 0 &&
-        <div style={{
-            background: "white",
-            color: "black",
-            padding: 20,
-            position: "absolute"
-        }}>
-            {searchResults.hits.map((hit, index) => {
-            return <div key={index}><a
-            style={{color: "blue", padding: 3}}
-            href={"/" + hit.input.data.metadata.url}>{hit.input.data.metadata.title}</a></div>
-            })}
-        </div>
-    }
-    </>
-  );
-}
-
-```
 
 (Optional) To position input in the sidebar, edit docusaurus config and set under themeConfig.navbar.items:
 ```json
