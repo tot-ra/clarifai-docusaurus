@@ -22,8 +22,8 @@ const sendToClarifai = async (id, filepath, text) => {
 
                     metadata: {
                         filepath,
-                        url: filepath.replace(".md", ""),
-                        title: getTitleFromMarkdown(text)
+                        url: generateURL(filepath),
+                        title: getTitleFromMarkdown(text, filepath)
                     }
                 }
             }
@@ -49,7 +49,27 @@ const sendToClarifai = async (id, filepath, text) => {
 
 };
 
-function getTitleFromMarkdown(text) {
+function generateURL(filepath) {
+    url = filepath.replace(".md", "");
+
+    // split url into parts
+    parts = url.split("/");
+    // if last part is index, remove it
+    if (parts[parts.length - 1] === "index") {
+        parts.pop();
+    }
+
+    // if last path is same as second to last, remove it
+    if (parts[parts.length - 1] === parts[parts.length - 2]) {
+        parts.pop();
+    }
+
+    // join parts back together
+    url = parts.join("/");
+    return url;
+}
+
+function getTitleFromMarkdown(text, filepath) {
     // First try to get title from frontmatter
     const titleRegex = /^title:\s+(.*)/gm;
     const match = titleRegex.exec(text);
@@ -62,14 +82,21 @@ function getTitleFromMarkdown(text) {
         title = match ? match[1] : null;    
     }
 
+    // If no title in frontmatter or first heading, use filename
+    if (!title) {
+        filepath = filepath.replace(".md", "");
+        title = filepath.split("/").pop().replace(/-/g, " ");
+        title = title.charAt(0).toUpperCase() + title.slice(1);
+    }
+
     return title;
 }
 
 // Function to read and process .md files
 const processMarkdownFiles = async (dirPath) => {
     try {
-        const files = await recursive(dirPath, ['!*.md']);
-        
+        const files = await recursive(dirPath, ['!*.md', 'node_modules']);
+
         for (const file of files) {
             const text = fs.readFileSync(file, 'utf-8');
             filepath = file.replace(dirPath, '');
