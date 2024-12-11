@@ -5,6 +5,17 @@ This allows to search your documentation using AI. Specifically, it uses embeddi
 
 ![](docs/example.png)
 
+## Overview
+```mermaid
+flowchart LR
+
+index-files.js --"read .md files one by one"--> docusaurus[(docusaurus files)]
+index-files.js --"add file via POST /inputs"--> clarifai
+
+docusaurus-ui -."include".-> SearchBar.js --"POST /search 'bees'"--> proxy-search.js --"POST inputs/searches"--> clarifai
+```
+
+
 ## Why
 1. Compared to traditional text search, this allows to find documents that are relevant by **meaning**.
   - You can pick which embedding model should be used (multilingual, domain specific etc) and the granularity level (document, paragraph etc).
