@@ -35,17 +35,22 @@ You can pick which embedding model should be used (multilingual, domain specific
 This was created as a hackathon project within 24h, so code is not ideal, feel free to improve.
 Whishlist for next steps:
 
+- maintain local cache of indexed files
+  - remove index on .md or image file deletion
+  - update index if doc was moved
 - add LRU cache to not hit Clarifai API on repeated search
-- convert to typescript
-- add PDFs to have visual search built-in
+- keyboard shortcuts (up/down/enter to navigate search results)
+- more media type support
+  - add PDFs to have visual search built-in
+  - audio (mp3) file matching and search
 - have CI example to have reindexing working automatically
-- remove index from clarifai on .md file deletion
 - have fallback to local text search (for example if search failed or is too slow)
 - have RAG, so that search could answer questions, ex. "given these markdown repo, write code that adds new audio file.."
   - needs different UI, large modal for more text, chat history etc
 - batching. Currently we post each file separately, but we could batch them to speed up and not hit rate limiter so fast
+- convert to typescript
 - tests
-- audio (mp3) file matching and search
+
 
 ## Installation
 ### Search Bar
