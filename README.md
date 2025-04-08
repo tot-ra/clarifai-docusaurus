@@ -1,3 +1,5 @@
+![image](https://github.com/user-attachments/assets/9697b203-07b2-4f74-9cb4-0bea5c886f09)
+
 # 🌀 clarifai-docusaurus 🦖
 Unofficial [Clarifai](https://www.clarifai.com/) AI search plugin for [docusaurus](https://docusaurus.io/). 
 Adds AI search to your docs.
